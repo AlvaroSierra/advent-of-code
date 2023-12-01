@@ -1,13 +1,16 @@
-const NUMS: &[&[u8]] = &[
-    b"one", b"two", b"three", b"four", b"five", b"six", b"seven", b"eight", b"nine",
-];
-
-
-
 fn main() {
     let input = include_str!("../input.txt");
 
     println!("{}", &input
+        .replace("one", "one1one")
+        .replace("two", "two2two")
+        .replace("three", "three3three")
+        .replace("four", "four4four")
+        .replace("five", "five5five")
+        .replace("six", "six6six")
+        .replace("seven", "seven7seven")
+        .replace("eight", "eight8eight")
+        .replace("nine", "nine9nine")
         .lines()
         .map(
         |x|
