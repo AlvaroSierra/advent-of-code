@@ -2,3 +2,4 @@
 Cargo.lock
 .idea
 input*.txt
+test_input.txt

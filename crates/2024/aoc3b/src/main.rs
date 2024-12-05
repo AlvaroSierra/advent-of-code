@@ -1,8 +1,11 @@
 #![feature(iter_intersperse)]
 
+use std::time::Instant;
+
 use regex::Regex;
 
 fn main() {
+    let start = Instant::now();
     let re1 = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     let input = include_str!("../input.txt");
 
@@ -16,6 +19,7 @@ fn main() {
     .map(|(_, [a, b])| a.parse::<isize>().unwrap() * b.parse::<isize>().unwrap())
     .sum();
 
+    println!("{:?}", start.elapsed());    
     println!("{}", a)
 
 }
