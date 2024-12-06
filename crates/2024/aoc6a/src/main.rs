@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 
 #[derive(Debug)]
 enum Direction {
@@ -29,6 +31,7 @@ impl Direction {
 
 
 fn main() {
+    let start = Instant::now();
     let input = include_bytes!("../input.txt");
     let mut map: Vec<Vec<u8>> = input.split(|&x| x == b'\n').map(|x| x.into_iter().map(|x| *x).collect()).collect();
     
@@ -40,16 +43,12 @@ fn main() {
         let temp_pointer: &mut u8 = map.get_mut(y).unwrap().get_mut(x).unwrap();
         *temp_pointer = b'X';
         let (x_in_front, y_in_front) = direction.next_pos(x, y);
-        println!("Looking at {x_in_front}, {y_in_front}");
         let character = map.get(y_in_front).and_then(|row| row.get(x_in_front));
-        println!("Character: {}", String::from_utf8(vec![*character.unwrap_or(&13)]).unwrap());
         match character {
             Some(b'#') => {
                 direction.next(); 
-                println!("{:?}", direction);
             },
             Some(b'X') | Some(b'.') => { 
-                println!("Moving forwards");
                 x = x_in_front;
                 y = y_in_front;
             },
@@ -59,5 +58,6 @@ fn main() {
     }
     let total = map.iter().map(|x| x.iter()).flatten().filter(|&&x| x == b'X').count();
 
+    println!("{:?}", start.elapsed());
     println!("{}", total);
 }

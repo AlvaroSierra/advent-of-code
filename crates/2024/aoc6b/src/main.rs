@@ -1,3 +1,5 @@
+use std::time::Instant;
+use std::sync::Arc;
 use rayon::prelude::*;
 
 #[derive(Debug)]
@@ -29,12 +31,21 @@ impl Direction {
 }
 
 #[derive(Clone)]
-struct Map {
-    data: Vec<Vec<u8>>,
+struct Map<'a> {
+    data: Arc<Vec<&'a [u8]>>,
     modified_val: Option<(usize, usize)>,
+    start_point: (usize, usize)
 }
 
-impl Map {
+impl<'a> Map<'a> {
+    fn new(data: Arc<Vec<&'a[u8]>>) -> Self {
+        Self {
+            data: data.clone(),
+            modified_val: None,
+            start_point: Self::start_xy(data)
+        }
+    }
+
     fn get(&self, x: usize, y: usize) -> Option<u8> {
         if let Some(vals) = self.modified_val {
             if y == vals.0 && x == vals.1 {
@@ -48,8 +59,8 @@ impl Map {
         self.modified_val = Some((x, y));
     }
 
-    fn start_xy(&self) -> (usize, usize) {
-        self.data
+    fn start_xy(data: Arc<Vec<&[u8]>>) -> (usize, usize) {
+        data
             .iter()
             .enumerate()
             .filter_map(|(inx, string)| {
@@ -62,11 +73,6 @@ impl Map {
             .unwrap()
     }
 
-    fn set_val(&mut self, x: usize, y: usize, to: u8) {
-        let temp_pointer: &mut u8 = self.data.get_mut(y).unwrap().get_mut(x).unwrap();
-        *temp_pointer = to;
-    }
-
     fn count_total(&self) -> usize {
         self.data
         .iter()
@@ -76,20 +82,20 @@ impl Map {
         .count()
     }
 
-    fn walk(&mut self) -> Option<usize>{
-        let (mut y, mut x) = self.start_xy();
+    fn walk(self) -> Option<usize>{
+        let (mut y, mut x) = self.start_point.clone();
         let mut direction = Direction::Up;
         let mut finished = false;
 
         for _ in 0..135200 {
-            self.set_val(x, y, b'X');
+            //self.set_val(x, y, b'X');
             let (x_in_front, y_in_front) = direction.next_pos(x, y);
             let character = self.get(x_in_front, y_in_front);
             match character {
                 Some(b'#') => {
                     direction.next();
                 }
-                Some(b'X') | Some(b'.') => {
+                Some(b'X') | Some(b'.') | Some(b'^') => {
                     x = x_in_front;
                     y = y_in_front;
                 }
@@ -109,15 +115,14 @@ impl Map {
 }
 
 fn main() {
+
     let input = include_bytes!("../input.txt");
-    let map = Map {
-        data: input
+    let map = Map::new(Arc::new(input
             .split(|&x| x == b'\n')
-            .map(|x| x.into_iter().map(|x| *x).collect())
-            .collect(),
-        modified_val: None,
-    };
+            .collect()));
     
+    let start = Instant::now();
+
     let total: usize = (0..130).into_par_iter().map(|y| {
         (0..130).into_iter().map(|x|
             {
@@ -128,5 +133,6 @@ fn main() {
         ).filter(|x| x.is_none()).count()
     }).sum();
 
+    println!("{:?}", start.elapsed());
     println!("{:?}", total);
 }
