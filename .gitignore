@@ -1,5 +1,13 @@
+# Ignore Haskell build artefacts
+dist-newstyle*
+
+# Ignore Rust build artefacts
 /target
 Cargo.lock
+
+# Ignore Jetbrains IDE metadata
 .idea
+
+# Ignore all input and test input files
 input*.txt
 test_input.txt
